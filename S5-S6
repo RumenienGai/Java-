@@ -1,0 +1,208 @@
+package seminar.seminar5.g1053;
+
+import seminar.seminar2.g1053.Categorie;
+import seminar.seminar2.g1053.Locatie;
+import seminar.seminar2.g1053.MijlocFix;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+public class Main {
+    public static void main(String[] args) {
+        try{
+            seminar.seminar2.g1053.Main mainS2=new seminar.seminar2.g1053.Main();
+            mainS2.citire("mf.csv");
+            //mainS2.print();
+
+            List<MijlocFix> mijloaceFixe=mainS2.getMijloaceFixe();
+            System.out.println("Mijloace Fixe:");
+
+//            mijloaceFixe.forEach(new Consumer<MijlocFix>() { //prelucreaza rand pe rand elementele din lista mijloaceFixe, prin metoda accept
+//                //aici scrii doar mijloaceFixe.forEach(new Consumer) si-ti scrie automat restul initial
+//                @Override
+//                public void accept(MijlocFix mijlocFix) {
+//                    System.out.println(mijlocFix);
+//                }
+//            });
+//
+//            //incepem lucrul cu Lamda (vezi pdf cu prezentarea de la acest seminar)
+//            System.out.println("\n\nLucru cu Lamda...");
+//            mijloaceFixe.forEach(mijlocFix -> System.out.println(mijlocFix));
+
+            mijloaceFixe.forEach(System.out::println); //tot in fisierul cu prezentarea, prin aceasta referinta ::, se face referinta la metoda prinln din System.out
+            // trb sa fie identic cu accept-ul de mai sus
+
+
+            /*
+Să se efectueze următoarele operațiuni listei de mijloace fixe folosind facilitățile de prelucrare funcțională a colecțiilor
+1. Selecția mijloacelor fixe cu valori cuprinse între două limite
+2. Selecția mijloacelor fixe de la o anumită locație
+3. Selecția mijloacelor fixe cu data de achiziție mai recentă decât o dată specificată
+4. Sortarea mijloacelor fixe după gradul de uzură
+5. Selecția tuturor locațiilor după denumire într-o colecție de tip Set<String>
+6. Regruparea mijloacelor fixe pe locații într-o structură de tip Map<Long, Locatie> unde cheie
+este numărul de inventar iar valoare sunt locațiile
+7. Gruparea mijloacelor fixe pe categorii într-o structură de tip Map<Categorie,
+List<MijlocFix>>
+8. Gruparea mijloacelor fixe pe categorii într-o structură de tip Map<Categorie, List<String>>,
+unde valori sunt listele cu denumirile mijloacelor fixe
+9. Uzura medie a mijloacelor fixe pe locații. Se va ține cont de denumirea locației.
+10. Regruparea mijloacelor fixe pe numerele de inventar într-o structură de tip Map<Long,?> unde
+cheie este numărul de inventar iar valoarea este de formată de denumire și dată achiziție
+11. Colectarea într-o structură de tip Map<Categorie,List<Long>> a numerelor de inventar pe
+categorii folosind un colector particularizat
+*/
+
+            //CERINTA 1
+
+            //stream-ul e o serializare, o prelucrare secventiala a colectiei
+            //folosim filter, si apoi in paranteza scriem new Predicate si dam pe ala ca sa genereze forma initiala
+            //apoi facem noi
+
+            List<MijlocFix> listaCerinta1=mijloaceFixe.stream().filter(new Predicate<MijlocFix>() {
+                @Override
+                public boolean test(MijlocFix mijlocFix) {
+                    return mijlocFix.getValoare()>=50000&&mijlocFix.getValoare()<=200000;
+                }
+            }).collect(Collectors.toList()); //si colectam rezultatele intr-o lista
+
+            System.out.println("Lista cerinta 1");
+            listaCerinta1.forEach(System.out::println);
+
+
+            //CERINTA 2
+            List<MijlocFix> listaCerinta2=mijloaceFixe.stream()
+                    .filter(mijlocFix -> mijlocFix.getLocatie().getDenumire().equalsIgnoreCase("Covasna"))
+                    .collect(Collectors.toList());
+            System.out.println("Lista cerinta 2");
+            listaCerinta2.forEach(System.out::println);
+
+            //CERINTA 3
+            List<MijlocFix> listaCerinta3=mijloaceFixe.stream()
+                    .filter(mijlocFix -> {try{
+                        return mijlocFix.getDataAchizitie().before(seminar.seminar2.g1053.Main.formatData.parse("01.01.2019")); //ai in seminar 2 aceasta structura
+                    //intoarce true daca este inainte de acea data
+                    }
+                    catch(Exception ex){
+                        return false;
+                    }
+                    })
+                    .collect(Collectors.toList());
+
+            System.out.println("Lista cerinta 3");
+            listaCerinta3.forEach(System.out::println);
+
+
+            ///////////////////////////
+            //SEMINAR 6///////////////
+            //////////////////////////
+
+            //CERINTA 4
+
+            //aici comparatia este dependenta de metoda compare suprascrisa in alte seminarii
+            List <MijlocFix> listaCerinta4=mijloaceFixe.stream()
+                    .sorted((mf1,mf2)->Double.compare(mf1.uzura(),mf2.uzura()))
+                    .collect(Collectors.toList());
+            System.out.println("\nLista cerinta 4\n\nMijloace fixe sortate dupa uzura");
+            listaCerinta4.forEach(System.out::println);
+
+            System.out.println("\n\nAfisate mai simplist:\n");
+            listaCerinta4.forEach(mijlocFix -> System.out.println(mijlocFix.getDenumire()+","+mijlocFix.uzura()));
+
+            //CERINTA 5
+            //set=colectie de date in care nu sunt repetate valorile
+
+            //am scris primul rand si dupa click dreapta intre paranteze, implement methods, apply, si modificam noi continutul
+            Set<String>  setCerinta5=mijloaceFixe.stream().map(new Function<MijlocFix, String>() { //am inlocuit object cu String aici
+                @Override
+                public String apply(MijlocFix mijlocFix) { //si aici am inlocuit Object cu String
+                    return mijlocFix.getLocatie().getDenumire();
+                }
+            }).collect(Collectors.toSet());
+
+            System.out.println("\nLista cerinta 5\n\nLista locatii:");
+            setCerinta5.forEach(System.out::println);
+
+
+            //acum schimbam in functie lamda acel apply (cred)
+            Set<String> setCerinta5_lamda=mijloaceFixe.stream().map(mf -> mf.getLocatie().getDenumire())
+            .collect(Collectors.toSet());
+
+            //se vede ca am sters acoladele si n am mai instantiat clasa anonima Function si implementat apply
+            System.out.println("\nLista cerinta 5 cu functie lamda\n\nLista locatii:");
+            setCerinta5_lamda.forEach(System.out::println);
+
+
+            //CERINTA 6
+            Map<Long, Locatie> mapCerinta6=mijloaceFixe.stream()
+                    .collect(Collectors.toMap(mijlocFix -> mijlocFix.getNrInventar(),
+                            mijlocFix ->mijlocFix.getLocatie() ));
+
+            System.out.println("\nMap cerinta 6\n\nNumere de inventar pe locatii:");
+            mapCerinta6.keySet()
+                    .forEach(numarInventar-> System.out.println(numarInventar+":"+mapCerinta6.get(numarInventar)));
+            //cu keySet scot cheile din map si prin acest get(numarInventar) obtin valoarea data de obiectul de inventar
+
+
+            //CERINTA 7
+            Map<Categorie,List<MijlocFix>>mapCerinta7=mijloaceFixe.stream()
+                    .collect(Collectors.groupingBy(mijlocFix -> mijlocFix.getCategorie())); //aici furnizez cheia prin care fac gruparea
+
+            System.out.println("\nMap cerinta 7\n");
+            mapCerinta7.keySet().forEach(categorie -> { //prima data categoria si dupa toate elementele din categoria respectiva
+                System.out.println(categorie+":");
+            mapCerinta7.get(categorie).forEach(System.out::println);
+            });
+
+
+            //CERINTA 8
+            //o grupare cu o mapare
+            Map<Categorie,List<String>>mapCerinta8=mijloaceFixe.stream()
+                    .collect(Collectors.groupingBy(mijlocFix->mijlocFix.getCategorie(),Collectors.mapping(MijlocFix::getDenumire,Collectors.toList()))); //cu mapping facem trecerea de la lista cu chestii obisnuite la liste cu denumiri
+
+            System.out.println("\nMap cerinta 8\n\nGrupare element pe categorii:\n");
+            mapCerinta8.keySet()
+                    .forEach(categorie-> System.out.println(categorie+":"+mapCerinta8.get(categorie)));
+
+
+            //CERINTA 9
+            //uzura medii, grupare pe locatii
+
+            //avem collector de medie
+
+            //string ptr ca punem denumirea locatiei si Double ptr valoarea medie
+            Map<String,Double>mapCerinta9=mijloaceFixe.stream()
+                    .collect(Collectors.groupingBy(mijlocFix -> mijlocFix.getLocatie().getDenumire(),Collectors.averagingDouble(MijlocFix::uzura)));
+
+            System.out.println("\nMap cerinta 9\n\nUzuri medii,grupare pe locatii:\n");
+            mapCerinta9.keySet()
+                    .forEach(denumireLocatie-> System.out.println(denumireLocatie+":"+mapCerinta9.get(denumireLocatie)));
+
+
+            //CERINTA 10
+            Map<Long,?>mapCerinta10=mijloaceFixe.stream().collect(Collectors.toMap(
+                    mijlocFix -> mijlocFix.getNrInventar(),
+                    mijlocFix->new Object(){ //deschidem acolade si apoi click dreapta,generate, override, toString
+
+                        @Override
+                        public String toString() {
+                            return mijlocFix.getDenumire()+","+mijlocFix.getDataAchizitie();
+                        }
+                    }
+                    ));
+
+            System.out.println("\nMap cerinta 10\n\n");
+            mapCerinta10.keySet()
+                    .forEach(nrinventar-> System.out.println(nrinventar+":"+mapCerinta10.get(nrinventar)));
+
+        }
+        catch(Exception ex){
+            System.err.print(ex);
+        }
+    }
+}
